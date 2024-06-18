@@ -1,13 +1,12 @@
- Author: Steven Mugisha Mizero, <smugisha@uoguelph.ca>
-
 A `said` (Self-Addressing Identifier) - a special type of content-addressable identifier based on encoded cryptographic digest that is self-referential.
 
 - SAIDs facilitates immutably referenced data serialization for applications such as [Verifiable Credentials](https://en.wikipedia.org/wiki/Verifiable_credentials) or [Ricardian Contracts](https://en.wikipedia.org/wiki/Ricardian_contract).
 
-#### `said` [Generation and Verification Protocols](https://www.ietf.org/archive/id/draft-ssmith-said-03.html#section-2.3)
+### `said` [Generation and Verification Protocols](https://www.ietf.org/archive/id/draft-ssmith-said-03.html#section-2.3)
 ---
 - `saids` are encoded with CESR (Composable Event Stream Representation) [CESR](https://datatracker.ietf.org/doc/draft-ssmith-cesr/) which includes cryptographic algorithms used to generate the digest.
-##### A simple example of a `said` generation:
+  
+### A simple example of a `said` generation:
 - The CESR encoding used is a Blake3-256 (32 bytes) binary digest which has 44 Base-64 URL-safe characters - the first character is **E** representing Blake3-256.
 
 Step 1: **Fill the field to hold the `said` with 44 of # characters length.**
@@ -27,8 +26,9 @@ Step 3: **Replace the dummy `#` with the produced `said` - the final serializati
 `field0______E8wYuBjhslETYaLZcxMkWrhVbMcA8RS1pKYl7nJ77ntA______`
 
 
-> [!Warning] Order-Preserving Data Structures
+> Order-Preserving Data Structures
 > The  crucial consideration in `said` generation is reproducibility.
+
 
 - `said` generation to be reproducibly requires the ordering and sizing of fields to be fixed.
 - The essential feature needed for reproducible serialization of mappings (dictionaries or hash tables) is that mapping preserve the ordering of its fields on any round trip to/from a serialization.
@@ -36,7 +36,7 @@ Step 3: **Replace the dummy `#` with the produced `said` - the final serializati
 - A way to describe a predefined order preserving serialization is **canonicalization** or **canonical ordering**. This affects the functional perspective of ordering fields as they are sorted by labels prior to serialization.
 - Hash tables such `defaultdict` in `python`, the new `ECMAScript` introducing `Reflect.ownPropertyKeys()`, and the version 1.9 of `Ruby` with `Hash class` do preserve insertion order of the fields. Thus there is no need of any **canonical serialization**, one can rely on natural insertion order of the mappings to preserve the functional logic or can always opt for lexicographic ordering to create the insertion order.
 
-#### `said` verification protocol:
+### `said` verification protocol:
 1.  Make a copy of the embedded CESR encoded SAID string included in the serialization. 
 2. Replace the SAID field value in the serialization with a dummy string of the same length. The dummy character is #, that is, ASCII 35 decimal (23 hex). 
 3. Compute the digest of the serialization that includes the dummy value for the SAID field. Use the digest algorithm specified by the CESR  derivation code of the copied SAID. 
@@ -44,7 +44,7 @@ Step 3: **Replace the dummy `#` with the produced `said` - the final serializati
 5. Compare the copied SAID with the recomputed SAID. If they are identical then the verification is successful; otherwise, unsuccessful.
 
 
-##### Steps  for generating a `said`  using a `python dict` 
+### Steps  for generating a `said`  using a `python dict` 
 ---
 1. Initial `dict` before serialization.
 
@@ -71,18 +71,15 @@ Step 3: **Replace the dummy `#` with the produced `said` - the final serializati
 3. The `dict` serialized into `json` with no extra whitespace:
 `{"said":"############################################","first":"Sue","last":"Smith","role":"Founder"}.
 
-4. The Blake3-256 digest is then computed on that serialized `json`:
-
-`said`: `EnKa0ALimLL8eQdZGzglJG_SxvncxkmvwFDhIyLFchUk`
+4. The Blake3-256 digest is then computed on that serialized `json`: `said`: `EnKa0ALimLL8eQdZGzglJG_SxvncxkmvwFDhIyLFchUk`
 
 5. The final serialization with the `said` embedded as follows:
 `{"said":"EnKa0ALimLL8eQdZGzglJG_SxvncxkmvwFDhIyLFchUk","first":"Sue","last":"Smith","role":"Founder"}
 
-
-> [!Note] Preserving Order
+> Preserving Order
 > The generation steps may be reversed to verify the embedded `said` following the verification protocol defined above. However, to achieve consistency `said` generation and verification protocol for mapping assumes that the fields in a mapping serialization such as `json` are ordered in a stable, and reproducible order, i.e., canonical.
 
-##### The Human Colossus Lab ([HCF](https://humancolossus.foundation/)) [`said`](https://github.com/THCLab/cesrox/tree/master/said) implementation in `rust`
+### The Human Colossus Lab ([HCF](https://humancolossus.foundation/)) [`said`](https://github.com/THCLab/cesrox/tree/master/said) implementation in `rust`
 ---
 The below section summarizes the work done by HCF to compute `saids`. The emphasis is to understand the `SAD` macro that contains the under hood functionalities allowing the manipulation of RUST AST of an object (i.e., a `struct`) to place the computed digest inside the `struct` it was calculated on. But again we want the clarity of what happens when you write an OCAFILE and get an OCA bundle that has a `said` and each overlay containing individual `said`.
 
@@ -126,9 +123,9 @@ Example of a `struct` that implements `SAD` Marco:
 #[derive(SAD, Serialize)]
 #[version(protocol = "KERI", major = 1, minor = 0)]
 struct Something {
-	pub text: String,
-	#[said]
-	pub d: Option<SelfAddressingIdentifier>,
+    pub text: String,
+    #[said]
+    pub d: Option<SelfAddressingIdentifier>,
 }
 ```
 
@@ -187,7 +184,8 @@ mod tests {
             .unwrap()
             .verify_binding(&something.derivation_data(&code, &format)));
     }
-}```
+}
+```
 
 Part I: 
  - [Derivation crate](https://github.com/THCLab/cesrox/tree/master/said/src/derivation)  - `use said::derivation::HashFunctionCode`, wraps the possible hash functions supported by [CESROX](https://github.com/THCLab/cesrox/tree/master/cesr). i.e.; in the above code snippet `Blake3_256` is used.
@@ -200,8 +198,8 @@ Part II:
 
 ```Rust
 let mut something = Something {
-	text: "Hello world".to_string(),
-	d: None,
+    text: "Hello world".to_string(),
+    d: None,
 };
 ```
 
@@ -223,7 +221,7 @@ let derivation_data = something.derivation_data(&code, &format);
 Part III:
 `assert_eq!` and `assert!` are used to the output of the functions.
 
-#### `SAD` Marco In-depth
+### `SAD` Marco In-depth
 ----
 This section goes one level deeper and explains how we achieve the placement of the computed digest inside the `struct` it was initially computed on.
 
@@ -233,9 +231,9 @@ How does Rust allow manipulating a `struct`:
 
 For more in-depth about Procedural Macros take a look at a simple practical example [here](https://www.youtube.com/watch?v=XY0yR6IPbhw&ab_channel=Schr%C3%B6dinger%27sWatermelon) or refer to this documentation [here](https://doc.rust-lang.org/book/ch19-06-macros.html) for more beginner friendly introduction to Procedural Macros concepts.
 
-#### This is how the [HCF](https://github.com/THCLab) computes `said` using **Procedural Macros**:
+### This is how the [HCF](https://github.com/THCLab) computes `said` using **Procedural Macros**:
 
->[!Note] why `SAD` macro?
+> why `SAD` macro?
 >Starting with the `sad` trait which implements two functions: `compute_digest` and `derivation_data`. A `SAD` macro is created to avoid structs to individually implementing these functions but rather depend on the `SAD` macro abstraction. For usability the `SAD` macro the structs have to be annotated with `#[derive](SAD)`, and implement `Serialize` trait. 
 
 The below code snippet shows the `SAD` trait which can also be found  [here](https://github.com/THCLab/cesrox/tree/master/said/src/sad):
@@ -252,20 +250,19 @@ pub use sad_macros::SAD;
 
 pub trait SAD {
     fn compute_digest(
-	    &mut self,
-	    derivation: &HashFunctionCode,
-	    format: &SerializationFormats
-	);
-
+       &mut self,
+       derivation: &HashFunctionCode,
+       format: &SerializationFormats
+    );
     fn derivation_data(
-        &self,
-        derivation: &HashFunctionCode,
-        format: &SerializationFormats,
+       &self,
+       derivation: &HashFunctionCode,
+       format: &SerializationFormats,
     ) -> Vec<u8>;
 }
 ```
 
-> [!Warning] SAD Macro
+> SAD Macro
 
 Similar to other Procedural Macros its start by defining the function that takes in a `TokenStream` and returns `TokenStream`. The `TokenStream` is generated by the Rust compiler and it is essentially a serialized version of the syntax tree of the annotated item, representing Rust code in a way that can be manipulated programmatically. 
 
@@ -294,8 +291,8 @@ pub fn compute_digest_derive(input: TokenStream) -> TokenStream {
 // Notice that we have added Serialize attribute to be able to use the macro
 #[derive(SAD, Serialize)]
 struct FirstStruct {
-	#[said]
-	d: None
+    #[said]
+    d: None
 }
 ```
 
@@ -308,7 +305,7 @@ As an example: the digest could be something like `E8wYuBjhslETYaLZcxMkWrhVbMcA8
 
 ```Rust
 struct FirstStruct {
-	d: E8wYuBjhslETYaLZcxMkWrhVbMcA8RS1pKYl7nJ77ntA
+   d: E8wYuBjhslETYaLZcxMkWrhVbMcA8RS1pKYl7nJ77ntA
 }
 
 ```
@@ -523,7 +520,7 @@ gen.into()
 ```
 
 
-#### References
+### References
 ---
 1. https://www.ietf.org/archive/id/draft-ssmith-said-03.html#name-appendix-embedding-saids-in
 2. https://github.com/THCLab/cesrox/tree/master/said
